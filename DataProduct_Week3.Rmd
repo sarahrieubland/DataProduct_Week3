@@ -1,0 +1,53 @@
+---
+title: "Data Product week 3 Asignment"
+author: "Sarah R"
+date: "24/09/2017"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Human Development data
+
+The United Nations Development Programme publishes data on Human Development Index (HDI) and poverty. Here we want to represent the countries in the world on a map alongside their ranking.  For more details on the data source see <http://hdr.undp.org/en>.
+
+```{r ind, echo = T, cache = T}
+setwd("/Users/srieubland/Documents/Documents/DataScience/09_DataProduct/week3/asignment/DataProduct_Week3")
+dfIndex <- read.csv("Poverty.csv", stringsAsFactors = F, 
+                    header = T, skip = 1)
+```
+
+Some minimal cleansing of the Country names.
+```{r ind2, echo = T}
+dfIndex[46,]$Country <- "  Cote d'Ivoire"
+dfIndex$Country <- substr(dfIndex$Country,2, nchar(dfIndex$Country))
+```
+
+## Prepare the Multiline plots with Plotly 
+
+We want to display the time series of HDI for the top 5 and bottom 5 countries. Some data manipulation is needed. 
+```{r lili, echo = TRUE, message= F}
+library(dplyr)
+library(tidyr)
+library(plotly)
+```
+
+```{r prepL, echo = TRUE}
+dtime <- seq(from = 1990,to = 2015, by = 1)
+top5 <- dfIndex[order(dfIndex$HDI.Rank..2015.)[1:5],-1]
+ptop5 <- top5  %>% gather(date, Index, 2:ncol(top5)) %>%
+        spread_(names(top5)[1], "Index") %>%select(-date) %>% 
+        gather(Country, Index) %>% mutate(date = rep(dtime, 5))
+```
+
+```{r prepB, echo = TRUE, eval = F}
+plot_ly(ptop5, x = ~date, y = ~Index, color = ~Country, type = "scatter", mode = "lines")
+```
+
+## Top 5 Countries by HDI
+```{r prepB0, echo = F}
+plot_ly(ptop5, x = ~date, y = ~Index, color = ~Country, type = "scatter", mode = "lines")
+```
+
